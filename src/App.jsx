@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Html } from '@react-three/drei';
 import {
   Heart,
   Play,
@@ -27,6 +27,33 @@ import {
   getCardiacMetrics,
 } from './services/cardiacEngine';
 import './App.css';
+
+class HeartModelErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('HeartModel 3D Error:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Html center>
+          <div className="canvas-model-error">
+            <p style={{ margin: 0, fontWeight: 700 }}>Failed to load 3D Heart Model</p>
+            <small style={{ color: '#94a3b8' }}>{this.state.error?.message || 'Network or parse error'}</small>
+            <button onClick={() => window.location.reload()}>Retry</button>
+          </div>
+        </Html>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export default function App() {
   // Playback & Timing State
@@ -158,16 +185,27 @@ export default function App() {
           <pointLight position={[0, 0, 1.8]} intensity={0.5} />
 
           {/* Realistic 3D Heart Model with Calibrated Conduction System */}
-          <Suspense fallback={null}>
-            <HeartModel
-              phase={telemetry.heartPhase}
-              progress={telemetry.heartProgress}
-              modelChoice={modelChoice}
-              showNodes={showNodes}
-              showFibers={showFibers}
-              showLabels={showLabels}
-              showSparks={showSparks}
-            />
+          <Suspense
+            fallback={
+              <Html center>
+                <div className="canvas-model-loader">
+                  <div className="loader-spinner" />
+                  <span className="loader-text">Loading 3D Heart Model...</span>
+                </div>
+              </Html>
+            }
+          >
+            <HeartModelErrorBoundary>
+              <HeartModel
+                phase={telemetry.heartPhase}
+                progress={telemetry.heartProgress}
+                modelChoice={modelChoice}
+                showNodes={showNodes}
+                showFibers={showFibers}
+                showLabels={showLabels}
+                showSparks={showSparks}
+              />
+            </HeartModelErrorBoundary>
           </Suspense>
 
           {/* Interactive Orbit Controls */}
