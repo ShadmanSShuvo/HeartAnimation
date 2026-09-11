@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { getEcgVoltage } from '../services/cardiacEngine';
 
 /**
@@ -8,32 +8,52 @@ import { getEcgVoltage } from '../services/cardiacEngine';
  * - Full synthesized Lead II waveform curve with phosphorescent glow
  * - Dynamic sweep cursor with active voltage bead
  * - Click & drag scrubbing directly on the ECG graph
+ * - Responsive auto-sizing to parent container
  */
 export default function EcgOscilloscope({
   phaseRatio = 0,
   voltage = 0,
-  width = 540,
-  height = 90,
+  width,
+  height = 80,
   onScrub,
 }) {
+  const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const isDraggingRef = useRef(false);
+  const [measuredWidth, setMeasuredWidth] = useState(width || 310);
 
-  // Draw ECG strip on every phaseRatio change
+  // Auto-measure container width
+  useEffect(() => {
+    if (width) {
+      setMeasuredWidth(width);
+      return;
+    }
+    const updateSize = () => {
+      if (containerRef.current) {
+        const w = containerRef.current.clientWidth;
+        if (w > 0) setMeasuredWidth(w);
+      }
+    };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, [width]);
+
+  // Draw ECG strip on every phaseRatio or width change
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    // Set internal resolution matching device pixel ratio for retina sharpness
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    ctx.scale(dpr, dpr);
-
-    const w = width;
+    const w = measuredWidth;
     const h = height;
+    const dpr = window.devicePixelRatio || 1;
+
+    // Set internal resolution matching device pixel ratio for retina sharpness
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.scale(dpr, dpr);
 
     // 1. Background
     ctx.fillStyle = '#0a0f17';
@@ -110,7 +130,6 @@ export default function EcgOscilloscope({
     ctx.restore();
 
     // Highlight path up to current phase
-    const curX = phaseRatio * w;
     ctx.beginPath();
     for (let i = 0; i <= sampleCount; i++) {
       const p = i / sampleCount;
@@ -134,6 +153,7 @@ export default function EcgOscilloscope({
     ctx.restore();
 
     // 4. Draw Cursor & Active Indicator Bead
+    const curX = phaseRatio * w;
     const curY = baseY - voltage * mvScale;
 
     // Vertical sweep cursor line
@@ -171,13 +191,13 @@ export default function EcgOscilloscope({
     const sign = voltage >= 0 ? '+' : '';
     ctx.fillStyle = '#38bdf8';
     ctx.font = 'bold 10px monospace';
-    ctx.fillText(`${sign}${voltage.toFixed(2)} mV`, w - 75, 13);
+    ctx.fillText(`${sign}${voltage.toFixed(2)} mV`, Math.max(160, w - 75), 13);
 
-  }, [phaseRatio, voltage, width, height]);
+  }, [phaseRatio, voltage, measuredWidth, height]);
 
   // Handle direct scrubbing on canvas
   const handlePointer = (e) => {
-    if (!onScrub) return;
+    if (!onScrub || !canvasRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
     const clientX = e.clientX ?? e.touches?.[0]?.clientX;
     if (clientX === undefined) return;
@@ -203,8 +223,10 @@ export default function EcgOscilloscope({
 
   return (
     <div
+      ref={containerRef}
       style={{
         position: 'relative',
+        width: '100%',
         borderRadius: '10px',
         overflow: 'hidden',
         border: '1px solid rgba(16, 185, 129, 0.3)',
@@ -222,7 +244,7 @@ export default function EcgOscilloscope({
         ref={canvasRef}
         style={{
           display: 'block',
-          width: `${width}px`,
+          width: `${measuredWidth}px`,
           height: `${height}px`,
         }}
       />

@@ -15,6 +15,8 @@ import {
   Minimize2,
   Info,
   Sliders,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 import HeartModel, { ACTIVE_HEART_MODEL } from './HeartModel';
@@ -44,7 +46,8 @@ export default function App() {
 
   // UI Panels
   const [showTelemetryDetails, setShowTelemetryDetails] = useState(true);
-  const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
+  const [showControlsPanel, setShowControlsPanel] = useState(true);
+  const [showLayersDropdown, setShowLayersDropdown] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const controlsRef = useRef(null);
@@ -121,10 +124,10 @@ export default function App() {
   // Fullscreen toggle
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen?.().catch(() => { });
+      document.documentElement.requestFullscreen?.().catch(() => {});
       setIsFullscreen(true);
     } else {
-      document.exitFullscreen?.().catch(() => { });
+      document.exitFullscreen?.().catch(() => {});
       setIsFullscreen(false);
     }
   };
@@ -262,16 +265,16 @@ export default function App() {
           <button
             className={`icon-hud-btn ${showTelemetryDetails ? 'active' : ''}`}
             onClick={() => setShowTelemetryDetails((v) => !v)}
-            title="Toggle Clinical Telemetry"
+            title="Toggle Clinical Telemetry (Left Panel)"
           >
             <Info size={17} />
           </button>
 
-          {/* Settings Drawer Toggle */}
+          {/* Toggle Controls Panel (Right) */}
           <button
-            className={`icon-hud-btn ${showSettingsDrawer ? 'active' : ''}`}
-            onClick={() => setShowSettingsDrawer((v) => !v)}
-            title="Layer & Camera Controls"
+            className={`icon-hud-btn ${showControlsPanel ? 'active' : ''}`}
+            onClick={() => setShowControlsPanel((v) => !v)}
+            title="Toggle ECG & Playback Panel (Right Panel)"
           >
             <Sliders size={17} />
           </button>
@@ -321,7 +324,7 @@ export default function App() {
       </nav>
 
       {/* =================================================================== */}
-      {/* 4. CLINICAL TELEMETRY & STAGE DEEP-DIVE (Floating Top-Left)         */}
+      {/* 4. CLINICAL TELEMETRY & STAGE DEEP-DIVE (Floating Left)             */}
       {/* =================================================================== */}
       {showTelemetryDetails && (
         <aside className="telemetry-floating-card">
@@ -333,6 +336,7 @@ export default function App() {
             <button
               className="close-telemetry-btn"
               onClick={() => setShowTelemetryDetails(false)}
+              title="Close Telemetry"
             >
               ×
             </button>
@@ -375,136 +379,68 @@ export default function App() {
       )}
 
       {/* =================================================================== */}
-      {/* 5. SETTINGS & VIEW CONTROLS DRAWER (Floating Right)                 */}
+      {/* 5. FLOATING RIGHT CONTROL PANEL (ECG + SCRUBBER + BPM + LAYERS)     */}
       {/* =================================================================== */}
-      {showSettingsDrawer && (
-        <aside className="settings-floating-drawer">
-          <div className="drawer-header">
-            <div className="drawer-title">
-              <Layers size={16} />
-              <span>3D Layers & Visualization</span>
+      {showControlsPanel && (
+        <aside className="right-control-panel">
+          {/* Header */}
+          <div className="panel-header">
+            <div className="panel-title-badge">
+              <Activity size={14} color="#38bdf8" />
+              <span>LEAD II ECG & CONTROLS</span>
             </div>
             <button
               className="close-telemetry-btn"
-              onClick={() => setShowSettingsDrawer(false)}
+              onClick={() => setShowControlsPanel(false)}
+              title="Hide Controls"
             >
               ×
             </button>
           </div>
 
-          <div className="drawer-section">
-            <span className="drawer-section-title">Anatomical Layers</span>
-            <label className="drawer-toggle-row">
-              <span>SA & AV Pacemaker Nodes</span>
-              <input
-                type="checkbox"
-                checked={showNodes}
-                onChange={(e) => setShowNodes(e.target.checked)}
-              />
-            </label>
-            <label className="drawer-toggle-row">
-              <span>Conduction Pathways (His/BB)</span>
-              <input
-                type="checkbox"
-                checked={showFibers}
-                onChange={(e) => setShowFibers(e.target.checked)}
-              />
-            </label>
-            <label className="drawer-toggle-row">
-              <span>Purkinje Network</span>
-              <input
-                type="checkbox"
-                checked={showFibers}
-                onChange={(e) => setShowFibers(e.target.checked)}
-              />
-            </label>
-            <label className="drawer-toggle-row">
-              <span>Electrical Impulse Sparks</span>
-              <input
-                type="checkbox"
-                checked={showSparks}
-                onChange={(e) => setShowSparks(e.target.checked)}
-              />
-            </label>
-            <label className="drawer-toggle-row">
-              <span>3D Anatomical Labels</span>
-              <input
-                type="checkbox"
-                checked={showLabels}
-                onChange={(e) => setShowLabels(e.target.checked)}
-              />
-            </label>
-          </div>
-
-          <div className="drawer-section">
-            <span className="drawer-section-title">Camera & Scene</span>
-            <label className="drawer-toggle-row">
-              <span>Auto-Rotate Camera</span>
-              <input
-                type="checkbox"
-                checked={autoRotate}
-                onChange={(e) => setAutoRotate(e.target.checked)}
-              />
-            </label>
-            <button className="drawer-action-btn" onClick={handleResetCamera}>
-              <Compass size={15} />
-              <span>Reset 3D View</span>
-            </button>
-          </div>
-        </aside>
-      )}
-
-      {/* =================================================================== */}
-      {/* 6. FLOATING BOTTOM CONTROL DOCK (ECG + SCRUBBER + BPM)               */}
-      {/* =================================================================== */}
-      <footer className="bottom-control-dock">
-        {/* Row 1: Interactive Lead II ECG Oscilloscope Canvas */}
-        <div className="ecg-oscilloscope-container">
-          <EcgOscilloscope
-            phaseRatio={phaseRatio}
-            voltage={telemetry.voltage}
-            width={580}
-            height={82}
-            isPlaying={isPlaying}
-            onScrub={(ratio) => {
-              setIsPlaying(false);
-              setPhaseRatio(ratio);
-            }}
-          />
-        </div>
-
-        {/* Row 2: Conduction Timeline Scrubber */}
-        <div className="scrubber-row">
-          <span className="scrubber-time-label">0 ms</span>
-          <div className="scrubber-track-wrap">
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.002"
-              value={phaseRatio}
-              onChange={(e) => {
+          {/* Section 1: Interactive Lead II ECG Oscilloscope Canvas */}
+          <div className="ecg-oscilloscope-container">
+            <EcgOscilloscope
+              phaseRatio={phaseRatio}
+              voltage={telemetry.voltage}
+              height={78}
+              onScrub={(ratio) => {
                 setIsPlaying(false);
-                setPhaseRatio(parseFloat(e.target.value));
+                setPhaseRatio(ratio);
               }}
-              className="conduction-slider"
             />
-            {/* Stage markers along the scrub bar */}
-            <div className="scrubber-indicators">
-              <span style={{ left: '16%' }} title="P-Wave">P</span>
-              <span style={{ left: '36%' }} title="QRS Complex">QRS</span>
-              <span style={{ left: '60%' }} title="Systole">Systole</span>
-              <span style={{ left: '74%' }} title="T-Wave">T</span>
-            </div>
           </div>
-          <span className="scrubber-time-label">
-            {currentBeatMs} / {metrics.cycleTimeMs} ms
-          </span>
-        </div>
 
-        {/* Row 3: Playback Transport Buttons & BPM Adjuster */}
-        <div className="transport-row">
-          {/* Transport buttons */}
+          {/* Section 2: Conduction Timeline Scrubber */}
+          <div className="scrubber-row">
+            <span className="scrubber-time-label">0 ms</span>
+            <div className="scrubber-track-wrap">
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.002"
+                value={phaseRatio}
+                onChange={(e) => {
+                  setIsPlaying(false);
+                  setPhaseRatio(parseFloat(e.target.value));
+                }}
+                className="conduction-slider"
+              />
+              {/* Stage markers along the scrub bar */}
+              <div className="scrubber-indicators">
+                <span style={{ left: '16%' }} title="P-Wave">P</span>
+                <span style={{ left: '36%' }} title="QRS Complex">QRS</span>
+                <span style={{ left: '60%' }} title="Systole">Systole</span>
+                <span style={{ left: '74%' }} title="T-Wave">T</span>
+              </div>
+            </div>
+            <span className="scrubber-time-label">
+              {currentBeatMs} / {metrics.cycleTimeMs} ms
+            </span>
+          </div>
+
+          {/* Section 3: Playback Transport Buttons */}
           <div className="transport-buttons-group">
             <button
               className="transport-btn"
@@ -514,7 +450,7 @@ export default function App() {
               }}
               title="Step Back 5% (Left Arrow)"
             >
-              <SkipBack size={18} />
+              <SkipBack size={16} />
             </button>
 
             <button
@@ -522,7 +458,7 @@ export default function App() {
               onClick={() => setIsPlaying((p) => !p)}
               title={isPlaying ? 'Pause (Spacebar)' : 'Play (Spacebar)'}
             >
-              {isPlaying ? <Pause size={20} /> : <Play size={20} className="play-icon-offset" />}
+              {isPlaying ? <Pause size={18} /> : <Play size={18} className="play-icon-offset" />}
             </button>
 
             <button
@@ -533,7 +469,7 @@ export default function App() {
               }}
               title="Step Forward 5% (Right Arrow)"
             >
-              <SkipForward size={18} />
+              <SkipForward size={16} />
             </button>
 
             <button
@@ -541,13 +477,11 @@ export default function App() {
               onClick={() => setPhaseRatio(0)}
               title="Reset Beat to Diastole"
             >
-              <RotateCcw size={17} />
+              <RotateCcw size={15} />
             </button>
           </div>
 
-          <div className="transport-divider" />
-
-          {/* Heart Rate / BPM Controller */}
+          {/* Section 4: Heart Rate / BPM Adjuster */}
           <div className="bpm-control-group">
             <div className="bpm-header-info">
               <span className="bpm-label">HEART RATE:</span>
@@ -590,8 +524,71 @@ export default function App() {
               </button>
             </div>
           </div>
-        </div>
-      </footer>
+
+          {/* Section 5: Collapsible 3D Layers & Camera Controls */}
+          <div className="layers-dropdown-section">
+            <button
+              className="layers-dropdown-toggle"
+              onClick={() => setShowLayersDropdown((v) => !v)}
+            >
+              <div className="layers-dropdown-title">
+                <Layers size={14} />
+                <span>3D Scene & Layers</span>
+              </div>
+              {showLayersDropdown ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+            </button>
+
+            {showLayersDropdown && (
+              <div className="layers-dropdown-content">
+                <label className="drawer-toggle-row">
+                  <span>SA & AV Pacemaker Nodes</span>
+                  <input
+                    type="checkbox"
+                    checked={showNodes}
+                    onChange={(e) => setShowNodes(e.target.checked)}
+                  />
+                </label>
+                <label className="drawer-toggle-row">
+                  <span>Conduction Pathways (His/BB)</span>
+                  <input
+                    type="checkbox"
+                    checked={showFibers}
+                    onChange={(e) => setShowFibers(e.target.checked)}
+                  />
+                </label>
+                <label className="drawer-toggle-row">
+                  <span>Electrical Impulse Sparks</span>
+                  <input
+                    type="checkbox"
+                    checked={showSparks}
+                    onChange={(e) => setShowSparks(e.target.checked)}
+                  />
+                </label>
+                <label className="drawer-toggle-row">
+                  <span>3D Anatomical Labels</span>
+                  <input
+                    type="checkbox"
+                    checked={showLabels}
+                    onChange={(e) => setShowLabels(e.target.checked)}
+                  />
+                </label>
+                <label className="drawer-toggle-row">
+                  <span>Auto-Rotate Camera</span>
+                  <input
+                    type="checkbox"
+                    checked={autoRotate}
+                    onChange={(e) => setAutoRotate(e.target.checked)}
+                  />
+                </label>
+                <button className="drawer-action-btn" onClick={handleResetCamera}>
+                  <Compass size={14} />
+                  <span>Reset 3D View</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </aside>
+      )}
     </div>
   );
 }
