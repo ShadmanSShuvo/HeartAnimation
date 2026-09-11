@@ -185,6 +185,17 @@ export default function App() {
           <pointLight position={[0, 0, 1.8]} intensity={0.5} />
 
           {/* Realistic 3D Heart Model with Calibrated Conduction System */}
+          <Suspense fallback={null}>
+            <HeartModel
+              phase={telemetry.heartPhase}
+              progress={telemetry.heartProgress}
+              modelChoice={modelChoice}
+              showNodes={showNodes}
+              showFibers={showFibers}
+              showLabels={showLabels}
+              showSparks={showSparks}
+            />
+            </Suspense>
           <Suspense
             fallback={
               <Html center>
