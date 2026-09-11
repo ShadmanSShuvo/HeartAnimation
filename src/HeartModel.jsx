@@ -268,7 +268,15 @@ export const MODEL_CONFIGS = {
   },
 };
 
-export default function HeartModel({ phase = 'diastole', progress = 0, modelChoice }) {
+export default function HeartModel({
+  phase = 'diastole',
+  progress = 0,
+  modelChoice,
+  showNodes = true,
+  showFibers = true,
+  showLabels = true,
+  showSparks = true,
+}) {
   const heartGroup = useRef();
   const realisticModelRef = useRef();
 
@@ -443,154 +451,166 @@ export default function HeartModel({ phase = 'diastole', progress = 0, modelChoi
       <group position={config.conductionOffset} scale={config.conductionScale}>
 
         {/* ============ CARDIAC CONDUCTION NODES ============ */}
+        {showNodes && (
+          <>
+            {/* Sinoatrial (SA) Node */}
+            <Sphere ref={saNodeRef} args={[config.nodeRadius.sa, 16, 16]} position={config.saPos}>
+              <meshStandardMaterial
+                color="#fbbf24"
+                emissive="#fbbf24"
+                emissiveIntensity={0.5}
+                toneMapped={false}
+              />
+            </Sphere>
 
-        {/* Sinoatrial (SA) Node */}
-        <Sphere ref={saNodeRef} args={[config.nodeRadius.sa, 16, 16]} position={config.saPos}>
-          <meshStandardMaterial
-            color="#fbbf24"
-            emissive="#fbbf24"
-            emissiveIntensity={0.5}
-            toneMapped={false}
-          />
-        </Sphere>
-
-        {/* Atrioventricular (AV) Node */}
-        <Sphere ref={avNodeRef} args={[config.nodeRadius.av, 16, 16]} position={config.avPos}>
-          <meshStandardMaterial
-            color="#f59e0b"
-            emissive="#f59e0b"
-            emissiveIntensity={0.5}
-            toneMapped={false}
-          />
-        </Sphere>
+            {/* Atrioventricular (AV) Node */}
+            <Sphere ref={avNodeRef} args={[config.nodeRadius.av, 16, 16]} position={config.avPos}>
+              <meshStandardMaterial
+                color="#f59e0b"
+                emissive="#f59e0b"
+                emissiveIntensity={0.5}
+                toneMapped={false}
+              />
+            </Sphere>
+          </>
+        )}
 
         {/* ============ 3D CONDUCTION TUBES ============ */}
+        {showFibers && (
+          <>
+            {/* Atrial Pathway 1: Internodal Tract */}
+            <ConductionTube
+              points={config.atrialPath1}
+              color={isAtrial ? '#38bdf8' : '#60a5fa'}
+              radius={config.tubeRadius.atrial}
+              opacity={isAtrial ? 0.95 : 0.4}
+            />
 
-        {/* Atrial Pathway 1: Internodal Tract */}
-        <ConductionTube
-          points={config.atrialPath1}
-          color={isAtrial ? '#38bdf8' : '#60a5fa'}
-          radius={config.tubeRadius.atrial}
-          opacity={isAtrial ? 0.95 : 0.4}
-        />
+            {/* Atrial Pathway 2: Bachmann Bundle */}
+            <ConductionTube
+              points={config.atrialPath2}
+              color={isAtrial ? '#818cf8' : '#60a5fa'}
+              radius={config.tubeRadius.atrial * 0.9}
+              opacity={isAtrial ? 0.95 : 0.3}
+            />
 
-        {/* Atrial Pathway 2: Bachmann Bundle */}
-        <ConductionTube
-          points={config.atrialPath2}
-          color={isAtrial ? '#818cf8' : '#60a5fa'}
-          radius={config.tubeRadius.atrial * 0.9}
-          opacity={isAtrial ? 0.95 : 0.3}
-        />
+            {/* Bundle of His */}
+            <ConductionTube
+              points={config.hisPath}
+              color={isVentricular ? '#22d3ee' : '#60a5fa'}
+              radius={config.tubeRadius.his}
+              opacity={isVentricular ? 1.0 : 0.45}
+            />
 
-        {/* Bundle of His */}
-        <ConductionTube
-          points={config.hisPath}
-          color={isVentricular ? '#22d3ee' : '#60a5fa'}
-          radius={config.tubeRadius.his}
-          opacity={isVentricular ? 1.0 : 0.45}
-        />
+            {/* Right Bundle Branch */}
+            <ConductionTube
+              points={config.rbbPath}
+              color={isVentricular ? '#60a5fa' : '#3b82f6'}
+              radius={config.tubeRadius.bundle}
+              opacity={isVentricular ? 0.95 : 0.4}
+            />
 
-        {/* Right Bundle Branch */}
-        <ConductionTube
-          points={config.rbbPath}
-          color={isVentricular ? '#60a5fa' : '#3b82f6'}
-          radius={config.tubeRadius.bundle}
-          opacity={isVentricular ? 0.95 : 0.4}
-        />
+            {/* Left Bundle Branch */}
+            <ConductionTube
+              points={config.lbbPath}
+              color={isVentricular ? '#60a5fa' : '#3b82f6'}
+              radius={config.tubeRadius.bundle}
+              opacity={isVentricular ? 0.95 : 0.4}
+            />
 
-        {/* Left Bundle Branch */}
-        <ConductionTube
-          points={config.lbbPath}
-          color={isVentricular ? '#60a5fa' : '#3b82f6'}
-          radius={config.tubeRadius.bundle}
-          opacity={isVentricular ? 0.95 : 0.4}
-        />
-
-        {/* Purkinje Network */}
-        {config.purkinjeLines.map((pts, idx) => (
-          <ConductionTube
-            key={idx}
-            points={pts}
-            color={isVentricular ? '#c084fc' : '#818cf8'}
-            radius={config.tubeRadius.purkinje}
-            opacity={isVentricular ? 0.92 : 0.3}
-          />
-        ))}
+            {/* Purkinje Network */}
+            {config.purkinjeLines.map((pts, idx) => (
+              <ConductionTube
+                key={idx}
+                points={pts}
+                color={isVentricular ? '#c084fc' : '#818cf8'}
+                radius={config.tubeRadius.purkinje}
+                opacity={isVentricular ? 0.92 : 0.3}
+              />
+            ))}
+          </>
+        )}
 
         {/* ============ ELECTRICAL IMPULSE SPARKS ============ */}
+        {showSparks && (
+          <>
+            {/* Atrial Traveling Impulse */}
+            <Sphere ref={atrialSparkRef} args={[config.sparkRadius, 12, 12]} visible={false}>
+              <meshBasicMaterial color="#ffffff" />
+            </Sphere>
 
-        {/* Atrial Traveling Impulse */}
-        <Sphere ref={atrialSparkRef} args={[config.sparkRadius, 12, 12]} visible={false}>
-          <meshBasicMaterial color="#ffffff" />
-        </Sphere>
+            {/* His Bundle Impulse */}
+            <Sphere ref={hisSparkRef} args={[config.sparkRadius * 1.1, 12, 12]} visible={false}>
+              <meshBasicMaterial color="#67e8f9" />
+            </Sphere>
 
-        {/* His Bundle Impulse */}
-        <Sphere ref={hisSparkRef} args={[config.sparkRadius * 1.1, 12, 12]} visible={false}>
-          <meshBasicMaterial color="#67e8f9" />
-        </Sphere>
+            {/* Right Bundle Branch Impulse */}
+            <Sphere ref={rbbSparkRef} args={[config.sparkRadius, 12, 12]} visible={false}>
+              <meshBasicMaterial color="#93c5fd" />
+            </Sphere>
 
-        {/* Right Bundle Branch Impulse */}
-        <Sphere ref={rbbSparkRef} args={[config.sparkRadius, 12, 12]} visible={false}>
-          <meshBasicMaterial color="#93c5fd" />
-        </Sphere>
-
-        {/* Left Bundle Branch Impulse */}
-        <Sphere ref={lbbSparkRef} args={[config.sparkRadius, 12, 12]} visible={false}>
-          <meshBasicMaterial color="#93c5fd" />
-        </Sphere>
+            {/* Left Bundle Branch Impulse */}
+            <Sphere ref={lbbSparkRef} args={[config.sparkRadius, 12, 12]} visible={false}>
+              <meshBasicMaterial color="#93c5fd" />
+            </Sphere>
+          </>
+        )}
 
         {/* ============ 3D ANATOMICAL NAMING & LABELS ============ */}
+        {showLabels && (
+          <>
+            {/* SA Node Label */}
+            <ConductionLabel
+              position={config.labels.sa}
+              text="SA Node"
+              subtext="Pacemaker"
+              active={isAtrial}
+              activeColor="#fbbf24"
+            />
 
-        {/* SA Node Label */}
-        <ConductionLabel
-          position={config.labels.sa}
-          text="SA Node"
-          subtext="Pacemaker"
-          active={isAtrial}
-          activeColor="#fbbf24"
-        />
+            {/* AV Node Label */}
+            <ConductionLabel
+              position={config.labels.av}
+              text="AV Node"
+              active={isAvDelay}
+              activeColor="#f59e0b"
+            />
 
-        {/* AV Node Label */}
-        <ConductionLabel
-          position={config.labels.av}
-          text="AV Node"
-          active={isAvDelay}
-          activeColor="#f59e0b"
-        />
+            {/* Bundle of His Label */}
+            <ConductionLabel
+              position={config.labels.his}
+              text="His Bundle"
+              active={isVentricular}
+              activeColor="#22d3ee"
+            />
 
-        {/* Bundle of His Label */}
-        <ConductionLabel
-          position={config.labels.his}
-          text="His Bundle"
-          active={isVentricular}
-          activeColor="#22d3ee"
-        />
+            {/* Right Bundle Branch Label */}
+            <ConductionLabel
+              position={config.labels.rbb}
+              text="RBB"
+              subtext="Right Bundle"
+              active={isVentricular}
+              activeColor="#60a5fa"
+            />
 
-        {/* Right Bundle Branch Label */}
-        <ConductionLabel
-          position={config.labels.rbb}
-          text="RBB"
-          subtext="Right Bundle"
-          active={isVentricular}
-          activeColor="#60a5fa"
-        />
+            {/* Left Bundle Branch Label */}
+            <ConductionLabel
+              position={config.labels.lbb}
+              text="LBB"
+              subtext="Left Bundle"
+              active={isVentricular}
+              activeColor="#60a5fa"
+            />
 
-        {/* Left Bundle Branch Label */}
-        <ConductionLabel
-          position={config.labels.lbb}
-          text="LBB"
-          subtext="Left Bundle"
-          active={isVentricular}
-          activeColor="#60a5fa"
-        />
-
-        {/* Purkinje Fibers Label */}
-        <ConductionLabel
-          position={config.labels.purkinje}
-          text="Purkinje Fibers"
-          active={isVentricular}
-          activeColor="#c084fc"
-        />
+            {/* Purkinje Fibers Label */}
+            <ConductionLabel
+              position={config.labels.purkinje}
+              text="Purkinje Fibers"
+              active={isVentricular}
+              activeColor="#c084fc"
+            />
+          </>
+        )}
       </group>
     </group>
   );
