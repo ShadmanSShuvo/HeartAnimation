@@ -143,10 +143,13 @@ function ConductionLabel({ position, text, subtext, active, activeColor = '#38bd
  */
 export const ACTIVE_HEART_MODEL = 'model2';
 
+const BASE = import.meta.env.BASE_URL || '/';
+
 export const MODEL_CONFIGS = {
   model1: {
     name: 'Realistic Human Heart 1',
     url: '/realistic_human_heart.glb',
+    url: `${BASE}realistic_human_heart.glb`,
     modelScale: 1.85,
     modelPosition: [0, -0.05, 0],
     conductionScale: 1.85,
@@ -208,6 +211,7 @@ export const MODEL_CONFIGS = {
   model2: {
     name: 'Realistic Human Heart 2',
     url: '/realistic_human_heart2.glb',
+    url: `${BASE}realistic_human_heart2.glb`,
     modelScale: 0.3142,
     modelPosition: [-2.551, -1.847, -0.005],
     conductionScale: 0.3142,
@@ -619,3 +623,5 @@ export default function HeartModel({
 // Preload both realistic GLB models
 useGLTF.preload('/realistic_human_heart.glb');
 useGLTF.preload('/realistic_human_heart2.glb');
+useGLTF.preload(`${BASE}realistic_human_heart.glb`);
+useGLTF.preload(`${BASE}realistic_human_heart2.glb`);
