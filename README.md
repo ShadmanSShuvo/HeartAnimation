@@ -1,78 +1,142 @@
-# Standalone Full-Page 3D Human Heart Conduction Visualizer
+# 🫀 3D Human Heart Conduction & Lead II ECG Simulation
 
-An interactive, high-fidelity 3D electrophysiology simulation of the human heart powered by **React 19, Three.js, and @react-three/fiber**. 
+An interactive, high-fidelity 3D electrophysiology and conduction simulation of the human heart built with **React 19, Three.js, and @react-three/fiber**.
 
-This application operates **entirely client-side** with **zero backend dependencies**, featuring real-time synchronized **Lead II ECG signal generation**, active conduction propagation (SA Node ➔ AV Node ➔ Bundle of His ➔ Purkinje Fibers ➔ Ventricular Systole), and seamless **dual-model switching** between realistic 3D anatomical heart models.
-
----
-
-## Key Features
-
-1. **Standalone Zero-Backend Architecture**:
-   - Runs directly in any modern browser without Python, FastAPI, or external servers.
-   - Built-in mathematical electrophysiology engine synthesizing authentic physiological Lead II ECG waveforms at 250 Hz.
-
-2. **Synchronized 3D Conduction System**:
-   - **Sinoatrial (SA) Node**: Pacemaker firing synchronized with the **P-wave** (atrial depolarization).
-   - **Internodal Tracts & Bachmann Bundle**: Electrical impulse wavefront travels across the atrial myocardium.
-   - **Atrioventricular (AV) Node**: Physiological delay (~100 ms) holding conduction during the **PR segment** to allow ventricular filling.
-   - **Bundle of His & Bundle Branches (LBB / RBB)**: Rapid septal descent during the **Q-wave**.
-   - **Purkinje Fiber Arborization**: Subendocardial depolarization spreading from cardiac apex to base during the **R-peak** and **S-wave**.
-   - **Ventricular Systole & Ejection**: Realistic mechanical myocardial pump contraction and tissue glow during the **ST segment**.
-   - **Ventricular Repolarization**: Potassium reset during the **T-wave** returning to diastole.
-
-3. **Dual Realistic 3D Model Support**:
-   - Supports two photorealistic human heart 3D models (`realistic_human_heart.glb` and `realistic_human_heart2.glb`).
-   - Switchable via `ACTIVE_HEART_MODEL` in `HeartModel.jsx` or interactively via the UI header tab switcher.
-   - Exact surface-snapped coordinate mapping and scale normalization for both models.
-
-4. **Interactive Lead II ECG Oscilloscope**:
-   - 60fps HTML5 Canvas medical monitor with hospital telemetry grid (5mm major / 1mm minor lines).
-   - Live sweep cursor with active voltage bead and real-time millivolt readout.
-   - Click & drag directly on the oscilloscope to scrub through the cardiac cycle.
-
-5. **Clinical Controls & Telemetry**:
-   - **Transport Controls**: Play, Pause, Frame Step Back/Forward, and Reset (Spacebar & Arrow key support).
-   - **Conduction Stage Pipeline**: Click any stage chip (SA Node, AV Node, His, Purkinje, Systole) to jump directly to that electrical event.
-   - **Dynamic Heart Rate (BPM)**: Slider (40–160 BPM) with one-click clinical presets (Bradycardia, Resting, Active, Tachycardia) and automatic recalculation of $R\text{-}R$, $P\text{-}R$, and $Q\text{-}T$ intervals.
-   - **Layer Toggles**: Toggle Pacemaker Nodes, Conduction Tubes, Purkinje Mesh, 3D Labels, and Sparks.
+🔗 **Live Demo:** [https://shadmansshuvo.github.io/HeartAnimation/](https://shadmansshuvo.github.io/HeartAnimation/)
 
 ---
 
-## Quick Start
+## 🌟 Overview
+
+This application operates **entirely client-side** with **zero backend dependencies**, featuring real-time synchronized **Lead II ECG signal generation**, active conduction impulse propagation through cardiac anatomy (SA Node ➔ AV Node ➔ Bundle of His ➔ Purkinje Fibers ➔ Ventricular Systole), and seamless **dual-model switching** between two photorealistic 3D anatomical heart models.
+
+The user interface is designed with a non-obstructive dual-panel HUD layout:
+- **Left Panel:** Clinical Electrophysiology Monitor showing real-time intervals ($R\text{-}R$, $P\text{-}R$, $QRS$, $Q\text{-}T$, Cardiac Output).
+- **Center Canvas:** Completely unobstructed 3D human heart with 360° OrbitControls, showing the full organ from aortic branches to the cardiac apex.
+- **Right Panel:** Floating Lead II ECG Oscilloscope, Conduction Scrubber, Playback Transport Controls, BPM Controller, and 3D Scene Layer Toggles.
+
+---
+
+## ⚡ Key Features
+
+### 1. Standalone Zero-Backend Electrophysiology Engine
+- Runs directly in any modern browser without Python, FastAPI, or external servers.
+- Built-in mathematical electrophysiology engine synthesizing authentic Lead II ECG waveforms at $250\text{ Hz}$ with Gaussian morphing:
+  - **P-Wave**: Atrial depolarization triggered by the SA node.
+  - **PR Segment**: Atrioventricular pause holding conduction for ventricular filling.
+  - **QRS Complex**: Rapid septal descent down the Bundle of His and Purkinje arborization.
+  - **ST Segment & Systole**: Myocardial contraction pump and mechanical ejection.
+  - **T-Wave & Diastole**: Ventricular repolarization and myocardial relaxation.
+
+### 2. Dual Realistic 3D Heart Models with Auto-Coordinate Mapping
+- Supports two distinct photorealistic human heart 3D models (`realistic_human_heart.glb` and `realistic_human_heart2.glb`).
+- Independent surface-snapped coordinate mapping and scale normalization for both models.
+- Switchable in code via `ACTIVE_HEART_MODEL` in [`src/HeartModel.jsx`](src/HeartModel.jsx), or at runtime via UI buttons and keyboard shortcuts (`1` / `2`).
+
+### 3. Interactive Lead II ECG Oscilloscope
+- 60fps HTML5 Canvas medical monitor with hospital telemetry grid ($5\text{ mm}$ major / $1\text{ mm}$ minor lines).
+- Live sweep cursor with active voltage bead and real-time millivolt readout.
+- Click & drag directly on the oscilloscope to scrub through the cardiac cycle.
+
+### 4. Interactive Transport & Playback
+- **Transport Controls**: Play, Pause, Frame Step Back/Forward ($-5\%$ / $+5\%$), and Reset to beat start.
+- **Cycle Scrubber**: Continuous range slider with anatomical phase markers ($P$, $QRS$, $\text{Systole}$, $T$) and real-time millisecond readout ($t / \text{cycleTime}$).
+- **Conduction Stage Pipeline**: Click any stage chip (`SA Node`, `AV Node`, `His Bundle`, `Purkinje Fibers`, `Systole Pump`, `T-Wave`, `Diastole`) to jump directly to that electrophysiological event.
+- **Heart Rate Controller**: BPM slider ($40$ to $160\text{ BPM}$) with one-click clinical presets (`50 Brady`, `72 Rest`, `115 Active`, `150 Tachy`).
+
+### 5. 3D Scene & Visualization Layers
+- Toggle visibility for:
+  - Sinoatrial (SA) & Atrioventricular (AV) Pacemaker Nodes
+  - Conduction Pathways (Internodal Tracts, Bachmann Bundle, Bundle of His, LBB, RBB)
+  - Purkinje Fiber Network
+  - Electrical Impulse Sparks
+  - 3D Anatomical Labels
+  - Auto-Rotate Camera & Reset 3D View
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+| Key | Action |
+| --- | --- |
+| <kbd>Space</kbd> | Play / Pause cardiac playback |
+| <kbd>→</kbd> (Right Arrow) | Step forward $5\%$ in the cardiac cycle |
+| <kbd>←</kbd> (Left Arrow) | Step backward $5\%$ in the cardiac cycle |
+| <kbd>1</kbd> | Switch to **Heart Model 1** |
+| <kbd>2</kbd> | Switch to **Heart Model 2** |
+
+---
+
+## 🚀 Quick Start (Local Development)
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v18 or higher)
 - npm
 
-### Launch with One Command (macOS & Linux)
+### Launch
 ```bash
-./run_main.sh
-```
+# 1. Clone repository
+git clone https://github.com/ShadmanSShuvo/HeartAnimation.git
+cd HeartAnimation
 
-### Launch on Windows
-```bat
-run_main.bat
-```
-
-### Or Standard npm Commands
-```bash
-cd frontend
+# 2. Install dependencies
 npm install
+
+# 3. Start local development server
 npm run dev
 ```
 
-Open your browser at `http://localhost:5173`.
+Open [http://localhost:5173/HeartAnimation/](http://localhost:5173/HeartAnimation/) in your browser.
 
 ---
 
-## Selecting the Active 3D Heart Model
+## 🛠️ Automated GitHub Pages Deployment
 
-In `frontend/src/HeartModel.jsx`, you can specify the default model via `ACTIVE_HEART_MODEL`:
+The repository includes a GitHub Actions workflow in [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) that builds and publishes the application automatically on every push to `main`.
 
-```javascript
-// Switch between 'model1' (/realistic_human_heart.glb) and 'model2' (/realistic_human_heart2.glb)
-export const ACTIVE_HEART_MODEL = 'model2';
+To enable automated deployment on your own fork:
+1. Go to your repository on GitHub: `Settings` ➔ `Pages`.
+2. Under **Build and deployment** > **Source**, select **GitHub Actions**.
+3. Push to `main`:
+   ```bash
+   git add .
+   git commit -m "Update application"
+   git push origin main
+   ```
+4. Your site will automatically build and publish to `https://<username>.github.io/<repo-name>/`.
+
+---
+
+## 📁 Project Structure
+
+```text
+HeartAnimation/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml              # Automated GitHub Pages CI/CD workflow
+├── public/
+│   ├── favicon.svg                 # Application favicon
+│   ├── icons.svg                   # SVG assets
+│   ├── realistic_human_heart.glb   # 3D Heart Model 1
+│   └── realistic_human_heart2.glb  # 3D Heart Model 2
+├── src/
+│   ├── components/
+│   │   └── EcgOscilloscope.jsx     # 60fps HTML5 Canvas Lead II ECG monitor
+│   ├── services/
+│   │   └── cardiacEngine.js        # Mathematical electrophysiology & telemetry engine
+│   ├── App.css                     # Responsive glassmorphism styling
+│   ├── App.jsx                     # Main HUD, 3D Canvas, and controls
+│   ├── HeartModel.jsx              # Three.js 3D heart, calibrated nodes & conduction pathways
+│   ├── index.css                   # Minimal full-screen reset
+│   └── main.jsx                    # React entrypoint
+├── index.html                      # HTML template
+├── package.json                    # Project dependencies & scripts
+├── vite.config.js                  # Vite configuration with base path support
+└── README.md                       # Project documentation
 ```
 
-You can also toggle between Model 1 and Model 2 at runtime using the **Model 1 / Model 2** buttons in the top navigation header or by pressing keyboard keys `1` or `2`.
+---
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
