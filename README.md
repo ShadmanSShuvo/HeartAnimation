@@ -10,7 +10,7 @@ An interactive, high-fidelity 3D electrophysiology and conduction simulation of 
 </p>
 
 <p align="center">
-  <video src="./assets/animation.mov" width="100%" controls autoplay loop muted></video>
+  <video src="https://github.com/user-attachments/assets/dc4918af-5b1b-4929-a73f-65de796d5689" width="100%" controls autoplay loop muted></video>
 
 </p>
 
