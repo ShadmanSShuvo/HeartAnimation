@@ -2,8 +2,13 @@
 
 An interactive, high-fidelity 3D electrophysiology and conduction simulation of the human heart built with **React 19, Three.js, and @react-three/fiber**.
 <p align="center">
-  <img src="./assets/HeartAnimation.gif" alt="HeartAnimation Demo" width="850">
+  <img
+    src="./assets/HeartAnimation.gif"
+    alt="3D Human Heart Conduction Simulation"
+    width="850"
+  >
 </p>
+
 <p align="center">
   <a href="https://shadmansshuvo.github.io/HeartAnimation/">
     🔴 Live Demo
