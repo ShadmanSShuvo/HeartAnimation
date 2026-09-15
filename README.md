@@ -3,10 +3,15 @@
 An interactive, high-fidelity 3D electrophysiology and conduction simulation of the human heart built with **React 19, Three.js, and @react-three/fiber**.
 <p align="center">
   <img
-    src="./assets/HeartAnimation-smaller.gif"
+    src="./assets/HeartAnimation-tiny.gif"
     alt="3D Human Heart Conduction Simulation"
     width="850"
   >
+</p>
+
+<p align="center">
+  <video src="./assets/animation.mov" width="100%" controls autoplay loop muted></video>
+
 </p>
 
 <p align="center">
